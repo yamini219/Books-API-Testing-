@@ -1,0 +1,941 @@
+{
+  "info": {
+    "_postman_id": "75254b36-8d5e-415b-bca1-231f09bf5586",
+    "name": "Books Api Testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52945670",
+    "_collection_link": "https://go.postman.co/collection/52945670-75254b36-8d5e-415b-bca1-231f09bf5586?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//Validate status code\r",
+              "pm.test(\"To verify the status code is 201\",()=>{pm.response.to.have.status(201)});\r",
+              "\r",
+              "//Validate status message\r",
+              "pm.test(\"To verify the status message is created\",()=>{pm.response.to.have.status(\"Created\")});\r",
+              "\r",
+              "//Parse response\r",
+              "var responsedata = pm.response.json();\r",
+              "\r",
+              "//Store token\r",
+              "pm.environment.set(\"token\",responsedata.accessToken);\r",
+              "\r",
+              "//Validated token\r",
+              "pm.test(\"Token generated\",()=>{pm.expect(responsedata.accessToken).to.not.be.empty});\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Base URL setup\r",
+              "var url = \"https://simple-books-api.glitch.me\";\r",
+              "pm.collectionVariables.set(\"baseurl\",url);\r",
+              "\r",
+              "// Generate random data\r",
+              "var randomdata = Math.random().toString(36).substring(2);\r",
+              "var clientName = randomdata\r",
+              "var clientEmail = randomdata + \"@test.com\";\r",
+              "\r",
+              "// Store variables\r",
+              "pm.collectionVariables.set(\"randomclientName\",clientName);\r",
+              "pm.collectionVariables.set(\"randomclientEmail\",clientEmail);\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"clientName\": \"{{randomclientName}}\",\r\n  \"clientEmail\": \"{{randomclientEmail}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseurl}}/api-clients",
+          "host": [
+            "{{baseurl}}"
+          ],
+          "path": [
+            "api-clients"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List of All Books",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//Validate status code\r",
+              "pm.test(\"To verify the status code is 200\",()=>{pm.response.to.have.status(200)});\r",
+              "\r",
+              "//validate status message\r",
+              "pm.test(\"To verify the status message is OK\",()=>{pm.response.to.have.status(\"OK\")});\r",
+              "\r",
+              "//validate response time\r",
+              "pm.test(\"To verify Response time should be acceptable\",()=>{pm.expect(pm.response.responseTime).to.be.below(1000)});\r",
+              "\r",
+              "//Parse json and validate response should not be empty\r",
+              "var booksdata = pm.response.json();\r",
+              "pm.test(\"Books list should not empty\",()=>{pm.expect(booksdata.length).to.be.above(0)});\r",
+              "\r",
+              "//Schema validation\r",
+              "var schema = {\r",
+              "  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\r",
+              "  \"title\": \"Generated schema for Root\",\r",
+              "  \"type\": \"array\",\r",
+              "  \"items\": {\r",
+              "    \"type\": \"object\",\r",
+              "    \"properties\": {\r",
+              "      \"id\": {\r",
+              "        \"type\": \"number\"\r",
+              "      },\r",
+              "      \"name\": {\r",
+              "        \"type\": \"string\"\r",
+              "      },\r",
+              "      \"type\": {\r",
+              "        \"type\": \"string\"\r",
+              "      },\r",
+              "      \"available\": {\r",
+              "        \"type\": \"boolean\"\r",
+              "      }\r",
+              "    },\r",
+              "    \"required\": [\r",
+              "      \"id\",\r",
+              "      \"name\",\r",
+              "      \"type\",\r",
+              "      \"available\"\r",
+              "    ]\r",
+              "  }\r",
+              "}\r",
+              "pm.test(\"To verify the schema is valid\", () => {\r",
+              "    pm.expect(tv4.validate(booksdata,schema)).to.be.true\r",
+              "});\r",
+              "\r",
+              "//Storing the book id in variable\r",
+              "pm.collectionVariables.set(\"Bookid\",booksdata[0].id);\r",
+              "pm.collectionVariables.set(\"Bookname\",booksdata[0].name);\r",
+              "pm.collectionVariables.set(\"Booktype\",booksdata[0].type);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseurl}}/books",
+          "host": [
+            "{{baseurl}}"
+          ],
+          "path": [
+            "books"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Single Book Details",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//validate status code\r",
+              "pm.test(\"To veirfy the status code is 200\",()=>{pm.response.to.have.status(200)});\r",
+              "\r",
+              "//validate status message\r",
+              "pm.test(\"To veirfy the status message is Ok\",()=>{pm.response.to.have.status(\"OK\")});\r",
+              "\r",
+              "//validate content type is json\r",
+              "pm.test(\"To verify Content-Type should be JSON\",()=>{pm.expect(pm.response.headers.get('content-type')).to.include('application/json')});\r",
+              "\r",
+              "//validate data of the book\r",
+              "var singlebookdata = pm.response.json();\r",
+              "pm.test(\"To verify the details of the book\",()=>{\r",
+              "    pm.expect(singlebookdata.id).to.eql(pm.collectionVariables.get(\"Bookid\"));\r",
+              "    pm.expect(singlebookdata.name).to.eql(pm.collectionVariables.get(\"Bookname\"));\r",
+              "    pm.expect(singlebookdata.type).to.eql(pm.collectionVariables.get(\"Booktype\"));\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseurl}}/books/{{Bookid}}",
+          "host": [
+            "{{baseurl}}"
+          ],
+          "path": [
+            "books",
+            "{{Bookid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Order a Book",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//Validate status code\r",
+              "pm.test(\"To veirfy the status code is 201\",()=>{pm.response.to.have.status(201)});\r",
+              "\r",
+              "//validate status message\r",
+              "pm.test(\"To veify the status message is Created\",()=>{pm.response.to.have.status(\"Created\")});\r",
+              "\r",
+              "//Parse json\r",
+              "var orderdetails = pm.response.json()\r",
+              "\r",
+              "//Stored the orderid \r",
+              "pm.collectionVariables.set(\"orderId\",orderdetails.orderId);\r",
+              "\r",
+              "//Printed the orderid\r",
+              "console.log(pm.collectionVariables.get(\"orderId\"));"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "followAuthorizationHeader": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "7c0c5aaf8a0febe0551c10d230d55fbfedaa2cc98a90d69fffce2dfd644882d7",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"bookId\" : {{Bookid}},\r\n    \"customerName\" :\"{{randomclientName}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseurl}}/orders",
+          "host": [
+            "{{baseurl}}"
+          ],
+          "path": [
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Order Details",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//Validate status code\r",
+              "pm.test(\"To veriy the status code is 200\",()=>{pm.response.to.have.status(200)});\r",
+              "\r",
+              "//Validate status message\r",
+              "pm.test(\"To veriy the status message is OK\",()=>{pm.response.to.have.status(\"OK\")});\r",
+              "\r",
+              "//Parse json\r",
+              "var response = pm.response.json()\r",
+              "\r",
+              "// Validate match\r",
+              "var expectedorderid = pm.collectionVariables.get(\"orderId\");\r",
+              "var actualorderid = response.id\r",
+              "pm.test(\"To verify orderId matches stored value\",()=>{\r",
+              "    pm.expect(actualorderid).to.eql(expectedorderid)\r",
+              "});\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true,
+        "followAuthorizationHeader": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "7c0c5aaf8a0febe0551c10d230d55fbfedaa2cc98a90d69fffce2dfd644882d7",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseurl}}/orders/{{orderId}}",
+          "host": [
+            "{{baseurl}}"
+          ],
+          "path": [
+            "orders",
+            "{{orderId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update order",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//Validate status code\r",
+              "pm.test(\"To verify the status code is 200\",()=>{pm.response.to.have.status(204)});\r",
+              "\r",
+              "//Validate status message\r",
+              "pm.test(\"To verify the status message is OK\",()=>{pm.response.to.have.status(\"No Content\")});\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "//Generate random data\r",
+              "var randomnameforupdate = Math.random().toString(36).substring(2);\r",
+              "var randomename = randomnameforupdate;\r",
+              "\r",
+              "//Created a variale for storing the randomname\r",
+              "pm.collectionVariables.set(\"customerName\",randomename);\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "followAuthorizationHeader": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "7c0c5aaf8a0febe0551c10d230d55fbfedaa2cc98a90d69fffce2dfd644882d7",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"customerName\" :\"{{customerName}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseurl}}/orders/{{orderId}}",
+          "host": [
+            "{{baseurl}}"
+          ],
+          "path": [
+            "orders",
+            "{{orderId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Order Details - After update",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//Parse json\r",
+              "var orderdata = pm.response.json()\r",
+              "\r",
+              "//Stored expected and actual name\r",
+              "var expectedcustomername = pm.collectionVariables.get(\"customerName\")\r",
+              "var actualcustomername = orderdata.customerName;\r",
+              "\r",
+              "//Validate the match\r",
+              "pm.test(\"To verify the updated customer name\",()=>{pm.expect(expectedcustomername).to.eql(actualcustomername)});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true,
+        "followAuthorizationHeader": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "7c0c5aaf8a0febe0551c10d230d55fbfedaa2cc98a90d69fffce2dfd644882d7",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{baseurl}}/orders/{{orderId}}",
+          "host": [
+            "{{baseurl}}"
+          ],
+          "path": [
+            "orders",
+            "{{orderId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete order",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//Validate the status code\r",
+              "pm.test(\"Delete order\",()=>{pm.response.to.have.status(204)});\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "followAuthorizationHeader": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "7c0c5aaf8a0febe0551c10d230d55fbfedaa2cc98a90d69fffce2dfd644882d7",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "{{baseurl}}/orders/{{orderId}}",
+          "host": [
+            "{{baseurl}}"
+          ],
+          "path": [
+            "orders",
+            "{{orderId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Invalid token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//Validate status code\r",
+              "pm.test(\"To verify the status code is 401\",()=>{pm.response.to.have.status(401)});\r",
+              "\r",
+              "//Validate status message\r",
+              "pm.test(\"To verify the status message is Unauthorized\",()=>{pm.response.to.have.status(\"Unauthorized\")});\r",
+              "\r",
+              "//Validate response have error\r",
+              "var response = pm.response.json();\r",
+              "pm.test(\"Error message Exist\",()=>{pm.expect(response).to.have.property(\"error\")});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "Test@123",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"bookId\" : \"{{Bookid}}\",\r\n    \"customerName\" :\"{{customerName}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseurl}}/orders",
+          "host": [
+            "{{baseurl}}"
+          ],
+          "path": [
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Invalid Book Id",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.collectionVariables.set(\"invalidbookid\",9999);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//Validate the status code\r",
+              "pm.test(\"Status code is either 200 or 404\", () => {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);\r",
+              "});\r",
+              "\r",
+              "//Parse response\r",
+              "var res = pm.response.json();\r",
+              "\r",
+              "//Validate the Errors\r",
+              "pm.test(\"Error or empty response validation\", () => {\r",
+              "    if (pm.response.code === 404) {\r",
+              "        pm.expect(res).to.have.property(\"error\");\r",
+              "    } \r",
+              "    else {\r",
+              "        pm.expect(res).to.be.oneOf([null, {}, \"\"]);\r",
+              "    }\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseurl}}/books/{{invalidbookid}}",
+          "host": [
+            "{{baseurl}}"
+          ],
+          "path": [
+            "books",
+            "{{invalidbookid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Missing Required Field",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//Validate status code\r",
+              "pm.test(\"To verify the status code is 400\",()=>{pm.response.to.have.status(400)});\r",
+              "\r",
+              "//Validate status message\r",
+              "pm.test(\"To verify the status message is Bad Request\",()=>{pm.response.to.have.status(\"Bad Request\")});\r",
+              "\r",
+              "//Validate response have error\r",
+              "var response = pm.response.json();\r",
+              "pm.test(\"Error message Exist\",()=>{pm.expect(response).to.have.property(\"error\")});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "followAuthorizationHeader": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "2d3f44864aeb69a7d98c87435756e734eeedd63431d152833088947ae01b6fd5",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"bookId\": 1\r\n}"
+        },
+        "url": {
+          "raw": "{{baseurl}}/orders",
+          "host": [
+            "{{baseurl}}"
+          ],
+          "path": [
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Duplicate Order",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status is either 201 or 409\", () => {\r",
+              "    pm.expect(pm.response.code).to.be.oneOf([201, 409]);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "followAuthorizationHeader": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "2d3f44864aeb69a7d98c87435756e734eeedd63431d152833088947ae01b6fd5",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"bookId\" : {{Bookid}},\r\n    \"customerName\" :\"{{randomclientName}}\"\r\n}"
+        },
+        "url": {
+          "raw": "{{baseurl}}/orders",
+          "host": [
+            "{{baseurl}}"
+          ],
+          "path": [
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Unauthorized Access",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "//Validate status code\r",
+              "pm.test(\"To verify the status code is 401\",()=>{pm.response.to.have.status(401)});\r",
+              "\r",
+              "//Validate status message\r",
+              "pm.test(\"To verify the status message is Unauthorized\",()=>{pm.response.to.have.status(\"Unauthorized\")});\r",
+              "\r",
+              "//Validate Response time\r",
+              "pm.test(\"To verify Response time < 1000ms\", () => {\r",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+              "});\r",
+              "\r",
+              "//Validate response have error\r",
+              "var response = pm.response.json();\r",
+              "pm.test(\"Error message Exist\",()=>{pm.expect(response).to.have.property(\"error\")});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"bookId\" : \"{{Bookid}}\",\r\n    \"customerName\" :\"{{customerName}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseurl}}/orders",
+          "host": [
+            "{{baseurl}}"
+          ],
+          "path": [
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseurl",
+      "value": ""
+    },
+    {
+      "key": "Bookid",
+      "value": ""
+    },
+    {
+      "key": "orderid",
+      "value": ""
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    },
+    {
+      "key": "randomclientName",
+      "value": ""
+    },
+    {
+      "key": "randomclientEmail",
+      "value": ""
+    },
+    {
+      "key": "customerName",
+      "value": ""
+    },
+    {
+      "key": "Bookname",
+      "value": ""
+    },
+    {
+      "key": "Booktype",
+      "value": ""
+    },
+    {
+      "key": "invalidbookid",
+      "value": ""
+    }
+  ]
+}
